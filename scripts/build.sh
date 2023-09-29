@@ -11,12 +11,13 @@ DEBUG="${DEBUG:-false}"
 BUILD_VP9="${BUILD_VP9:-false}"
 BRANCH="${BRANCH:-master}"
 IOS="${IOS:-false}"
+TVOS="${TVOS:-false}"
 MACOS="${MACOS:-false}"
 MAC_CATALYST="${MAC_CATALYST:-false}"
 
 OUTPUT_DIR="./out"
 XCFRAMEWORK_DIR="out/WebRTC.xcframework"
-COMMON_GN_ARGS="is_debug=${DEBUG} rtc_libvpx_build_vp9=${BUILD_VP9} is_component_build=false rtc_include_tests=false rtc_enable_objc_symbol_export=true enable_stripping=true enable_dsyms=false use_lld=true"
+COMMON_GN_ARGS="is_debug=${DEBUG} rtc_libvpx_build_vp9=${BUILD_VP9} is_component_build=false rtc_include_tests=false rtc_enable_objc_symbol_export=true enable_stripping=true enable_dsyms=false use_lld=true rtc_exclude_audio_processing_module=true rtc_include_internal_audio_device=false"
 PLISTBUDDY_EXEC="/usr/libexec/PlistBuddy"
 
 build_iOS() {
@@ -25,6 +26,49 @@ build_iOS() {
     local gen_dir="${OUTPUT_DIR}/ios-${arch}-${environment}"
     local gen_args="${COMMON_GN_ARGS} target_cpu=\"${arch}\" target_os=\"ios\" target_environment=\"${environment}\" ios_deployment_target=\"12.0\" ios_enable_code_signing=false"
     gn gen "${gen_dir}" --args="${gen_args}"
+    ninja -C "${gen_dir}" framework_objc || exit 1
+}
+
+build_tvOS() {
+    local arch=$1
+    local environment=$2
+    local gen_dir="${OUTPUT_DIR}/tvos-${arch}-${environment}"
+    
+    if [ "$environment" = "simulator" ]; then
+        ios_sdk_name="appletvsimulator"
+        ios_sdk_platform="AppleTVSimulator"
+    else
+        ios_sdk_name="appletvos"
+        ios_sdk_platform="AppleTVOS"
+    fi
+    
+    SDK_INFO="./build/config/apple/sdk_info.py --get_sdk_info --get_machine_info "${ios_sdk_name}""
+    local ios_platform_build=$(eval $SDK_INFO | grep "sdk_build" | awk -F'[=]' '{print $2}')
+    local ios_sdk_path=$(eval $SDK_INFO | grep "sdk_path" | awk -F'[=]' '{print $2}')
+    local ios_sdk_build=$(eval $SDK_INFO | grep "sdk_build" | awk -F'[=]' '{print $2}')
+    local ios_sdk_platform_path=$(eval $SDK_INFO | grep "sdk_platform_path" | awk -F'[=]' '{print $2}')
+    local ios_sdk_version=$(eval $SDK_INFO | grep "sdk_version" | awk -F'[=]' '{print $2}')
+    local ios_toolchains_path=$(eval $SDK_INFO | grep "toolchains_path" | awk -F'[=]' '{print $2}')
+    local ios_bin_path="$(echo $ios_toolchains_path | tr -d '"')/usr/bin/"
+    local xcode_version=$(eval $SDK_INFO | grep "xcode_version=" | awk -F'[=]' '{print $2}')
+    local xcode_version_int=$(eval $SDK_INFO | grep "xcode_version_int" | awk -F'[=]' '{print $2}')
+    local xcode_build=$(eval $SDK_INFO | grep "xcode_build" | awk -F'[=]' '{print $2}')
+    local machine_os_build=$(eval $SDK_INFO | grep "machine_os_build" | awk -F'[=]' '{print $2}')
+
+    if [ "$environment" = "simulator" ]; then
+        ios_platform_build="\"\""
+    fi
+    
+    local target_args="target_cpu=\"${arch}\" target_os=\"ios\" target_environment=\"${environment}\""
+    local sdk_args="ios_sdk_path=${ios_sdk_path} ios_sdk_name=\"${ios_sdk_name}\" ios_sdk_platform=\"${ios_sdk_platform}\" ios_sdk_build=${ios_sdk_build} ios_sdk_platform_path=${ios_sdk_platform_path} ios_sdk_version=${ios_sdk_version} ios_toolchains_path=${ios_toolchains_path} ios_bin_path=\"${ios_bin_path}\" ios_platform_build=${ios_platform_build}"
+    local xcode_args="xcode_version=${xcode_version} xcode_version_int=${xcode_version_int} xcode_build=${xcode_build} machine_os_build=${machine_os_build}"
+    local gen_args="${COMMON_GN_ARGS} ${target_args} ${sdk_args} ${xcode_args} ios_deployment_target=\"12.0\" ios_enable_code_signing=false"
+    
+    gn gen "${gen_dir}" --args="${gen_args}"
+    
+    # Provide fixups for everything that couldn't be set by the above variables
+    ../scripts/fix-tvos.sh "${OUTPUT_DIR}/tvos-${arch}-${environment}"
+    
     ninja -C "${gen_dir}" framework_objc || exit 1
 }
 
@@ -82,8 +126,14 @@ if [ ! -d src ]; then
     fetch --nohooks webrtc_ios
 fi
 cd src
+git stash
 git fetch --all
 git checkout $BRANCH
+for filename in ../patches/*.patch; do
+    echo "Applying patch $filename..."
+    git apply $filename
+done
+
 cd ..
 gclient sync --with_branch_heads --with_tags
 cd src
@@ -99,6 +149,12 @@ if [ "$IOS" = true ]; then
     build_iOS "x64" "simulator"
     build_iOS "arm64" "simulator"
     build_iOS "arm64" "device"
+fi
+
+if [ "$TVOS" = true ]; then
+#    build_tvOS "x64" "simulator"
+    build_tvOS "arm64" "simulator"
+    build_tvOS "arm64" "device"
 fi
 
 if [ "$MACOS" = true ]; then
@@ -158,7 +214,40 @@ if [[ "$IOS" = true ]]; then
     LIB_COUNT=$((LIB_COUNT+2))
 fi
 
-# Step 5.2 - Add macOS libs to XCFramework
+# Step 5.2 - Add tvOS libs to XCFramework
+if [[ "$TVOS" = true ]]; then
+
+    TVOS_LIB_IDENTIFIER="tvos-arm64"
+    TVOS_SIM_LIB_IDENTIFIER="tvos-arm64-simulator"
+
+    mkdir "${XCFRAMEWORK_DIR}/${TVOS_LIB_IDENTIFIER}"
+    mkdir "${XCFRAMEWORK_DIR}/${TVOS_SIM_LIB_IDENTIFIER}"
+    LIB_TVOS_INDEX=0
+    LIB_TVOS_SIMULATOR_INDEX=1
+    plist_add_library $LIB_TVOS_INDEX $TVOS_LIB_IDENTIFIER "tvos"
+    plist_add_library $LIB_TVOS_SIMULATOR_INDEX $TVOS_SIM_LIB_IDENTIFIER "tvos" "simulator"
+
+    cp -r out/tvos-arm64-device/WebRTC.framework "${XCFRAMEWORK_DIR}/${TVOS_LIB_IDENTIFIER}"
+    cp -r out/tvos-arm64-simulator/WebRTC.framework "${XCFRAMEWORK_DIR}/${TVOS_SIM_LIB_IDENTIFIER}"
+
+    LIPO_TVOS_FLAGS="out/tvos-arm64-device/WebRTC.framework/WebRTC"
+    LIPO_TVOS_SIM_FLAGS="out/tvos-arm64-simulator/WebRTC.framework/WebRTC"
+
+    plist_add_architecture $LIB_TVOS_INDEX "arm64"
+    plist_add_architecture $LIB_TVOS_SIMULATOR_INDEX "arm64"
+#    plist_add_architecture $LIB_TVOS_SIMULATOR_INDEX "x86_64"
+
+    lipo -create -output  "${XCFRAMEWORK_DIR}/${TVOS_LIB_IDENTIFIER}/WebRTC.framework/WebRTC" ${LIPO_TVOS_FLAGS}
+    lipo -create -output "${XCFRAMEWORK_DIR}/${TVOS_SIM_LIB_IDENTIFIER}/WebRTC.framework/WebRTC" ${LIPO_TVOS_SIM_FLAGS}
+
+    # codesign simulator framework for local development.
+    # This makes it possible for Swift Packages to run Unit Tests and show SwiftUI Previews.
+    xcrun codesign -s - "${XCFRAMEWORK_DIR}/${TVOS_SIM_LIB_IDENTIFIER}/WebRTC.framework/WebRTC"
+
+    LIB_COUNT=$((LIB_COUNT+2))
+fi
+
+# Step 5.3 - Add macOS libs to XCFramework
 if [ "$MACOS" = true ]; then
 
     MAC_LIB_IDENTIFIER="macos-x86_64_arm64"
@@ -173,7 +262,7 @@ if [ "$MACOS" = true ]; then
     LIB_COUNT=$((LIB_COUNT+1))
 fi
 
-# Step 5.3 - macOS catalyst libs to XCFramework
+# Step 5.4 - macOS catalyst libs to XCFramework
 if [ "$MAC_CATALYST" = true ]; then
 
     CATALYST_LIB_IDENTIFIER="ios-x86_64_arm64-maccatalyst"

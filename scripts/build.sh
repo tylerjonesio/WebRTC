@@ -24,8 +24,9 @@ build_iOS() {
     local arch=$1
     local environment=$2
     local gen_dir="${OUTPUT_DIR}/ios-${arch}-${environment}"
-    local gen_args="${COMMON_GN_ARGS} target_cpu=\"${arch}\" target_os=\"ios\" target_environment=\"${environment}\" ios_deployment_target=\"12.0\" ios_enable_code_signing=false"
+    local gen_args="${COMMON_GN_ARGS} target_cpu=\"${arch}\" target_os=\"ios\" target_environment=\"${environment}\" ios_deployment_target=\"14.0\" ios_enable_code_signing=false"
     gn gen "${gen_dir}" --args="${gen_args}"
+    gn args --list ${gen_dir} > ${gen_dir}/gn-args.txt
     ninja -C "${gen_dir}" framework_objc || exit 1
 }
 
@@ -62,7 +63,7 @@ build_tvOS() {
     local target_args="target_cpu=\"${arch}\" target_os=\"ios\" target_environment=\"${environment}\""
     local sdk_args="ios_sdk_path=${ios_sdk_path} ios_sdk_name=\"${ios_sdk_name}\" ios_sdk_platform=\"${ios_sdk_platform}\" ios_sdk_build=${ios_sdk_build} ios_sdk_platform_path=${ios_sdk_platform_path} ios_sdk_version=${ios_sdk_version} ios_toolchains_path=${ios_toolchains_path} ios_bin_path=\"${ios_bin_path}\" ios_platform_build=${ios_platform_build}"
     local xcode_args="xcode_version=${xcode_version} xcode_version_int=${xcode_version_int} xcode_build=${xcode_build} machine_os_build=${machine_os_build}"
-    local gen_args="${COMMON_GN_ARGS} ${target_args} ${sdk_args} ${xcode_args} ios_deployment_target=\"12.0\" ios_enable_code_signing=false"
+    local gen_args="${COMMON_GN_ARGS} ${target_args} ${sdk_args} ${xcode_args} ios_deployment_target=\"14.0\" ios_enable_code_signing=false"
     
     gn gen "${gen_dir}" --args="${gen_args}"
     
@@ -77,6 +78,7 @@ build_macOS() {
     local gen_dir="${OUTPUT_DIR}/macos-${arch}"
     local gen_args="${COMMON_GN_ARGS} target_cpu=\"${arch}\" target_os=\"mac\""
     gn gen "${gen_dir}" --args="${gen_args}"
+    gn args --list ${gen_dir} > ${gen_dir}/gn-args.txt
     ninja -C "${gen_dir}" mac_framework_objc || exit 1
 }
 
@@ -87,6 +89,7 @@ build_catalyst() {
     local gen_dir="${OUTPUT_DIR}/catalyst-${arch}"
     local gen_args="${COMMON_GN_ARGS} target_cpu=\"${arch}\" target_environment=\"catalyst\" target_os=\"ios\" ios_deployment_target=\"14.0\" ios_enable_code_signing=false"
     gn gen "${gen_dir}" --args="${gen_args}"
+    gn args --list ${gen_dir} > ${gen_dir}/gn-args.txt
     ninja -C "${gen_dir}" framework_objc || exit 1
 }
 
@@ -137,10 +140,6 @@ done
 cd ..
 gclient sync --with_branch_heads --with_tags
 cd src
-
-# Step 2.5 - Apply patches (Temp)
-# sed -i '' 's/"-mllvm",$/# "-mllvm",/g' ./build/config/compiler/BUILD.gn
-# sed -i '' 's/"-instcombine-lower-dbg-declare=0",$/# "-instcombine-lower-dbg-declare=0",/g' ./build/config/compiler/BUILD.gn
 
 # Step 3 - Compile and build all frameworks
 rm -rf $OUTPUT_DIR  

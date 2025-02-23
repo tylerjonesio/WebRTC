@@ -10,10 +10,10 @@
 DEBUG="${DEBUG:-false}"
 BUILD_VP9="${BUILD_VP9:-true}"
 BRANCH="${BRANCH:-cd3e2951ff0f36fa12bea747862c52533a2b39f3}"
-IOS="${IOS:-false}"
+IOS="${IOS:-true}"
 TVOS="${TVOS:-true}"
-MACOS="${MACOS:-false}"
-MAC_CATALYST="${MAC_CATALYST:-false}"
+MACOS="${MACOS:-true}"
+MAC_CATALYST="${MAC_CATALYST:-true}"
 
 OUTPUT_DIR="./out"
 XCFRAMEWORK_DIR="out/WebRTC.xcframework"
@@ -137,7 +137,7 @@ if [ ! -d src ]; then
     fetch --nohooks webrtc_ios
 fi
 cd src
-# git stash
+git stash
 git fetch --all
 git checkout $BRANCH
 for filename in ../patches/*.patch; do

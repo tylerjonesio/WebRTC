@@ -8,10 +8,10 @@
 
 # Configs
 DEBUG="${DEBUG:-false}"
-BUILD_VP9="${BUILD_VP9:-false}"
-BRANCH="${BRANCH:-master}"
+BUILD_VP9="${BUILD_VP9:-true}"
+BRANCH="${BRANCH:-cd3e2951ff0f36fa12bea747862c52533a2b39f3}"
 IOS="${IOS:-false}"
-TVOS="${TVOS:-false}"
+TVOS="${TVOS:-true}"
 MACOS="${MACOS:-false}"
 MAC_CATALYST="${MAC_CATALYST:-false}"
 
@@ -31,6 +31,13 @@ build_iOS() {
 }
 
 build_tvOS() {
+
+    echo "Fixing SDK info checks to allow for tvOS..."
+    sed -i -- "s/\'macosx\', \'watchos\'/\'macosx\', \'appletvos\', \'appletvsimulator\', \'watchos\'/g" build/config/apple/sdk_info.py
+    sed -i -- "s/\'iphonesimulator\', \'macosx\'/\'iphonesimulator\', \'appletvos\', \'appletvsimulator\', \'macosx\'/g" build/config/apple/sdk_info.py
+    sed -i -- "s/watchos/appletvos/g" build/config/apple/codesign.py
+    sed -i -- "s/watchsimulator/appletvsimulator/g" build/config/apple/codesign.py
+
     local arch=$1
     local environment=$2
     local gen_dir="${OUTPUT_DIR}/tvos-${arch}-${environment}"
@@ -60,12 +67,13 @@ build_tvOS() {
         ios_platform_build="\"\""
     fi
     
-    local target_args="target_cpu=\"${arch}\" target_os=\"ios\" target_environment=\"${environment}\""
-    local sdk_args="ios_sdk_path=${ios_sdk_path} ios_sdk_name=\"${ios_sdk_name}\" ios_sdk_platform=\"${ios_sdk_platform}\" ios_sdk_build=${ios_sdk_build} ios_sdk_platform_path=${ios_sdk_platform_path} ios_sdk_version=${ios_sdk_version} ios_toolchains_path=${ios_toolchains_path} ios_bin_path=\"${ios_bin_path}\" ios_platform_build=${ios_platform_build}"
+    local target_args="rtc_disable_trace_events=true rtc_use_perfetto=false target_cpu=\"${arch}\" target_os=\"ios\" target_environment=\"${environment}\""
+    local sdk_args="ios_sdk_name=\"${ios_sdk_name}\" ios_sdk_platform=\"${ios_sdk_platform}\" ios_sdk_build=${ios_sdk_build} ios_sdk_platform_path=${ios_sdk_platform_path} ios_sdk_version=${ios_sdk_version} ios_toolchains_path=${ios_toolchains_path} ios_bin_path=\"${ios_bin_path}\""
     local xcode_args="xcode_version=${xcode_version} xcode_version_int=${xcode_version_int} xcode_build=${xcode_build} machine_os_build=${machine_os_build}"
-    local gen_args="${COMMON_GN_ARGS} ${target_args} ${sdk_args} ${xcode_args} ios_deployment_target=\"14.0\" ios_enable_code_signing=false"
+    local gen_args="${COMMON_GN_ARGS} ${target_args} ${sdk_args} ${xcode_args} ios_deployment_target=\"17.0\" ios_enable_code_signing=false"
     
     gn gen "${gen_dir}" --args="${gen_args}"
+    gn args --list ${gen_dir} > ${gen_dir}/gn-args.txt
     
     # Provide fixups for everything that couldn't be set by the above variables
     ../scripts/fix-tvos.sh "${OUTPUT_DIR}/tvos-${arch}-${environment}"
@@ -129,13 +137,17 @@ if [ ! -d src ]; then
     fetch --nohooks webrtc_ios
 fi
 cd src
-git stash
+# git stash
 git fetch --all
 git checkout $BRANCH
 for filename in ../patches/*.patch; do
     echo "Applying patch $filename..."
     git apply $filename
 done
+
+# Current tagged version has build issues with tvOS. Using newer version to bypass build issues.
+echo "Fixing perfetto ref for tvOS..."
+sed -i -- "s/c8812a34b1527871a8ce8bba753cd46c276ed4e2/25c2a683395d64a9c257aa1e3b1ee62340ffaf7d/g" DEPS
 
 cd ..
 gclient sync --with_branch_heads --with_tags
@@ -174,7 +186,7 @@ fi
 
 INFO_PLIST="${XCFRAMEWORK_DIR}/Info.plist"
 rm -rf "${XCFRAMEWORK_DIR}"
-mkdir "${XCFRAMEWORK_DIR}"
+mkdir -p "${XCFRAMEWORK_DIR}"
 "$PLISTBUDDY_EXEC" -c "Add :CFBundlePackageType string XFWK"  "${INFO_PLIST}"
 "$PLISTBUDDY_EXEC" -c "Add :XCFrameworkFormatVersion string 1.0"  "${INFO_PLIST}"
 "$PLISTBUDDY_EXEC" -c "Add :AvailableLibraries array" "${INFO_PLIST}"

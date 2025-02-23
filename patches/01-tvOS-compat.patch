@@ -1,8 +1,8 @@
 diff --git a/sdk/objc/components/audio/RTCAudioSessionConfiguration.m b/sdk/objc/components/audio/RTCAudioSessionConfiguration.m
-index 71b0c0cb3a..b6e5f5ae73 100644
+index 74de6b5ce2..4eb54a62e0 100644
 --- a/sdk/objc/components/audio/RTCAudioSessionConfiguration.m
 +++ b/sdk/objc/components/audio/RTCAudioSessionConfiguration.m
-@@ -59,7 +59,9 @@ static RTC_OBJC_TYPE(RTCAudioSessionConfiguration) *gWebRTCConfiguration = nil;
+@@ -60,7 +60,9 @@ static RTC_OBJC_TYPE(RTCAudioSessionConfiguration) *gWebRTCConfiguration = nil;
      // nonmixable, hence activating the session will interrupt any other
      // audio sessions which are also nonmixable.
      _category = AVAudioSessionCategoryPlayAndRecord;
@@ -13,19 +13,19 @@ index 71b0c0cb3a..b6e5f5ae73 100644
      // Specify mode for two-way voice communication (e.g. VoIP).
      _mode = AVAudioSessionModeVoiceChat;
 diff --git a/sdk/objc/components/capturer/RTCCameraVideoCapturer.h b/sdk/objc/components/capturer/RTCCameraVideoCapturer.h
-index 370bfa70f0..29028b908c 100644
+index 5185fa866e..d5297983ba 100644
 --- a/sdk/objc/components/capturer/RTCCameraVideoCapturer.h
 +++ b/sdk/objc/components/capturer/RTCCameraVideoCapturer.h
 @@ -19,6 +19,7 @@ NS_ASSUME_NONNULL_BEGIN
- RTC_OBJC_EXPORT
  // Camera capture that implements RTCVideoCapturer. Delivers frames to a
  // RTCVideoCapturerDelegate (usually RTCVideoSource).
-+API_AVAILABLE(tvos(17.0), ios(12.0), macos(10.11))
  NS_EXTENSION_UNAVAILABLE_IOS("Camera not available in app extensions.")
++API_AVAILABLE(tvos(17.0), ios(12.0), macos(10.11))
+ RTC_OBJC_EXPORT
  @interface RTC_OBJC_TYPE (RTCCameraVideoCapturer) : RTC_OBJC_TYPE(RTCVideoCapturer)
  
 diff --git a/sdk/objc/components/capturer/RTCCameraVideoCapturer.m b/sdk/objc/components/capturer/RTCCameraVideoCapturer.m
-index e7c47b4e99..b2dad032cf 100644
+index ff55bd7f19..bd4a0e2338 100644
 --- a/sdk/objc/components/capturer/RTCCameraVideoCapturer.m
 +++ b/sdk/objc/components/capturer/RTCCameraVideoCapturer.m
 @@ -15,7 +15,7 @@
@@ -37,7 +37,7 @@ index e7c47b4e99..b2dad032cf 100644
  #import "helpers/UIDevice+RTCDevice.h"
  #endif
  
-@@ -41,7 +41,7 @@ const int64_t kNanosecondsPerSecond = 1000000000;
+@@ -42,7 +42,7 @@ const int64_t kNanosecondsPerSecond = 1000000000;
    FourCharCode _preferredOutputPixelFormat;
    FourCharCode _outputPixelFormat;
    RTCVideoRotation _rotation;
@@ -46,7 +46,7 @@ index e7c47b4e99..b2dad032cf 100644
    UIDeviceOrientation _orientation;
    BOOL _generatingOrientationNotifications;
  #endif
-@@ -74,7 +74,7 @@ const int64_t kNanosecondsPerSecond = 1000000000;
+@@ -80,7 +80,7 @@ const int64_t kNanosecondsPerSecond = 1000000000;
        return nil;
      }
      NSNotificationCenter *center = [NSNotificationCenter defaultCenter];
@@ -55,16 +55,16 @@ index e7c47b4e99..b2dad032cf 100644
      _orientation = UIDeviceOrientationPortrait;
      _rotation = RTCVideoRotation_90;
      [center addObserver:self
-@@ -155,7 +155,7 @@ const int64_t kNanosecondsPerSecond = 1000000000;
-                     block:^{
-                       RTCLogInfo("startCaptureWithDevice %@ @ %ld fps", format, (long)fps);
+@@ -171,7 +171,7 @@ const int64_t kNanosecondsPerSecond = 1000000000;
+                                  format,
+                                  (long)fps);
  
 -#if TARGET_OS_IPHONE
 +#if TARGET_OS_IPHONE && !TARGET_OS_TV
                        dispatch_async(dispatch_get_main_queue(), ^{
                          if (!self->_generatingOrientationNotifications) {
-                           [[UIDevice currentDevice] beginGeneratingDeviceOrientationNotifications];
-@@ -202,7 +202,7 @@ const int64_t kNanosecondsPerSecond = 1000000000;
+                           [[UIDevice currentDevice]
+@@ -221,7 +221,7 @@ const int64_t kNanosecondsPerSecond = 1000000000;
                        }
                        [self.captureSession stopRunning];
  
@@ -72,17 +72,17 @@ index e7c47b4e99..b2dad032cf 100644
 +#if TARGET_OS_IPHONE && !TARGET_OS_TV
                        dispatch_async(dispatch_get_main_queue(), ^{
                          if (self->_generatingOrientationNotifications) {
-                           [[UIDevice currentDevice] endGeneratingDeviceOrientationNotifications];
-@@ -219,7 +219,7 @@ const int64_t kNanosecondsPerSecond = 1000000000;
+                           [[UIDevice currentDevice]
+@@ -239,7 +239,7 @@ const int64_t kNanosecondsPerSecond = 1000000000;
  
  #pragma mark iOS notifications
  
 -#if TARGET_OS_IPHONE
 +#if TARGET_OS_IPHONE && !TARGET_OS_TV
  - (void)deviceOrientationDidChange:(NSNotification *)notification {
-   [RTC_OBJC_TYPE(RTCDispatcher) dispatchAsyncOnType:RTCDispatcherTypeCaptureSession
-                                               block:^{
-@@ -245,7 +245,7 @@ const int64_t kNanosecondsPerSecond = 1000000000;
+   [RTC_OBJC_TYPE(RTCDispatcher)
+       dispatchAsyncOnType:RTCDispatcherTypeCaptureSession
+@@ -267,7 +267,7 @@ const int64_t kNanosecondsPerSecond = 1000000000;
      return;
    }
  
@@ -90,36 +90,36 @@ index e7c47b4e99..b2dad032cf 100644
 +#if TARGET_OS_IPHONE && !TARGET_OS_TV
    // Default to portrait orientation on iPhone.
    BOOL usingFrontCamera = NO;
-   // Check the image's EXIF for the camera the image came from as the image could have been
-@@ -297,7 +297,7 @@ const int64_t kNanosecondsPerSecond = 1000000000;
+   // Check the image's EXIF for the camera the image came from as the image
+@@ -323,7 +323,7 @@ const int64_t kNanosecondsPerSecond = 1000000000;
  - (void)captureOutput:(AVCaptureOutput *)captureOutput
      didDropSampleBuffer:(CMSampleBufferRef)sampleBuffer
           fromConnection:(AVCaptureConnection *)connection {
 -#if TARGET_OS_IPHONE
 +#if TARGET_OS_IPHONE && !TARGET_OS_TV
-   CFStringRef droppedReason =
-       CMGetAttachment(sampleBuffer, kCMSampleBufferAttachmentKey_DroppedFrameReason, nil);
+   CFStringRef droppedReason = CMGetAttachment(
+       sampleBuffer, kCMSampleBufferAttachmentKey_DroppedFrameReason, nil);
  #else
-@@ -311,7 +311,7 @@ const int64_t kNanosecondsPerSecond = 1000000000;
+@@ -338,7 +338,7 @@ const int64_t kNanosecondsPerSecond = 1000000000;
  
  - (void)handleCaptureSessionInterruption:(NSNotification *)notification {
    NSString *reasonString = nil;
 -#if TARGET_OS_IPHONE
 +#if TARGET_OS_IPHONE && !TARGET_OS_TV
-   NSNumber *reason = notification.userInfo[AVCaptureSessionInterruptionReasonKey];
+   NSNumber *reason =
+       notification.userInfo[AVCaptureSessionInterruptionReasonKey];
    if (reason) {
-     switch (reason.intValue) {
-@@ -343,7 +343,7 @@ const int64_t kNanosecondsPerSecond = 1000000000;
- 
-   [RTC_OBJC_TYPE(RTCDispatcher) dispatchAsyncOnType:RTCDispatcherTypeCaptureSession
-                                               block:^{
+@@ -373,7 +373,7 @@ const int64_t kNanosecondsPerSecond = 1000000000;
+   [RTC_OBJC_TYPE(RTCDispatcher)
+       dispatchAsyncOnType:RTCDispatcherTypeCaptureSession
+                     block:^{
 -#if TARGET_OS_IPHONE
 +#if TARGET_OS_IPHONE && !TARGET_OS_TV
-                                                 if (error.code == AVErrorMediaServicesWereReset) {
-                                                   [self handleNonFatalError];
-                                                 } else {
-@@ -394,7 +394,7 @@ const int64_t kNanosecondsPerSecond = 1000000000;
-                                               }];
+                       if (error.code == AVErrorMediaServicesWereReset) {
+                         [self handleNonFatalError];
+                       } else {
+@@ -427,7 +427,7 @@ const int64_t kNanosecondsPerSecond = 1000000000;
+                     }];
  }
  
 -#if TARGET_OS_IPHONE
@@ -127,9 +127,9 @@ index e7c47b4e99..b2dad032cf 100644
  
  #pragma mark - UIApplication notifications
  
-@@ -522,7 +522,7 @@ const int64_t kNanosecondsPerSecond = 1000000000;
- - (void)updateOrientation {
-   NSAssert([RTC_OBJC_TYPE(RTCDispatcher) isOnQueueForType:RTCDispatcherTypeCaptureSession],
+@@ -568,7 +568,7 @@ const int64_t kNanosecondsPerSecond = 1000000000;
+   NSAssert([RTC_OBJC_TYPE(RTCDispatcher)
+                isOnQueueForType:RTCDispatcherTypeCaptureSession],
             @"updateOrientation must be called on the capture queue.");
 -#if TARGET_OS_IPHONE
 +#if TARGET_OS_IPHONE && !TARGET_OS_TV
@@ -137,11 +137,11 @@ index e7c47b4e99..b2dad032cf 100644
  #endif
  }
 diff --git a/sdk/objc/components/renderer/metal/RTCMTLRenderer.h b/sdk/objc/components/renderer/metal/RTCMTLRenderer.h
-index aa31545973..f0e6b73f51 100644
+index 84aa3fe7fc..3a56774799 100644
 --- a/sdk/objc/components/renderer/metal/RTCMTLRenderer.h
 +++ b/sdk/objc/components/renderer/metal/RTCMTLRenderer.h
 @@ -37,7 +37,7 @@ NS_ASSUME_NONNULL_BEGIN
-  * cleanups.
+  * for performing cleanups.
   */
  
 -#if TARGET_OS_IOS
@@ -150,7 +150,7 @@ index aa31545973..f0e6b73f51 100644
  #else
  - (BOOL)addRenderingDestination:(__kindof NSView *)view;
 diff --git a/sdk/objc/helpers/RTCCameraPreviewView.h b/sdk/objc/helpers/RTCCameraPreviewView.h
-index db9b15a45c..c783aa9cc8 100644
+index 788e8c3e3e..3db184fdbb 100644
 --- a/sdk/objc/helpers/RTCCameraPreviewView.h
 +++ b/sdk/objc/helpers/RTCCameraPreviewView.h
 @@ -18,6 +18,7 @@
@@ -162,10 +162,10 @@ index db9b15a45c..c783aa9cc8 100644
  @interface RTC_OBJC_TYPE (RTCCameraPreviewView) : UIView
  
 diff --git a/sdk/objc/helpers/RTCCameraPreviewView.m b/sdk/objc/helpers/RTCCameraPreviewView.m
-index 12e87d8d64..94f5018a29 100644
+index 92c3cd2635..8d656ac825 100644
 --- a/sdk/objc/helpers/RTCCameraPreviewView.m
 +++ b/sdk/objc/helpers/RTCCameraPreviewView.m
-@@ -78,6 +78,7 @@
+@@ -81,6 +81,7 @@
  
  - (void)setCorrectVideoOrientation {
    // Get current device orientation.
@@ -173,9 +173,9 @@ index 12e87d8d64..94f5018a29 100644
    UIDeviceOrientation deviceOrientation = [UIDevice currentDevice].orientation;
    AVCaptureVideoPreviewLayer *previewLayer = [self previewLayer];
  
-@@ -99,21 +100,26 @@
-     }
-     // If device orientation switches to FaceUp or FaceDown, don't change video orientation.
+@@ -103,23 +104,28 @@
+     // If device orientation switches to FaceUp or FaceDown, don't change video
+     // orientation.
    }
 +  #endif
  }
@@ -184,18 +184,20 @@ index 12e87d8d64..94f5018a29 100644
  
  - (void)addOrientationObserver {
 +  #if TARGET_OS_IPHONE && !TARGET_OS_TV
-   [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(orientationChanged:)
-                                                 name:UIDeviceOrientationDidChangeNotification
-                                               object:nil];
+   [[NSNotificationCenter defaultCenter]
+       addObserver:self
+          selector:@selector(orientationChanged:)
+              name:UIDeviceOrientationDidChangeNotification
+            object:nil];
 +  #endif
  }
  
  - (void)removeOrientationObserver {
 +  #if TARGET_OS_IPHONE && !TARGET_OS_TV
-   [[NSNotificationCenter defaultCenter] removeObserver:self
-                                                   name:UIDeviceOrientationDidChangeNotification
-                                                 object:nil];
+   [[NSNotificationCenter defaultCenter]
+       removeObserver:self
+                 name:UIDeviceOrientationDidChangeNotification
+               object:nil];
 +  #endif
  }
  

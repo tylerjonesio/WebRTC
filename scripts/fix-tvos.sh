@@ -15,4 +15,6 @@ for ninja in $ninjas; do
     sed -i -- "s/iphonesimulator/appletvsimulator/g" $ninja
     sed -i -- "s/iPhoneOS/AppleTVOS/g" $ninja
     sed -i -- "s/iPhoneSimulator/AppleTVSimulator/g" $ninja
+    sed -i -- "s/libclang_rt.iossim.a/libclang_rt.tvossim.a/g" $ninja
+    sed -i -- "s/libclang_rt.ios.a/libclang_rt.tvos.a/g" $ninja
 done

@@ -1,9 +1,9 @@
-// swift-tools-version:5.8
+// swift-tools-version:5.10
 import PackageDescription
 
 let package = Package(
     name: "WebRTC",
-    platforms: [.iOS(.v14), .macOS(.v10_11), .tvOS(.v17)],
+    platforms: [.iOS(.v14), .macOS(.v11), .tvOS(.v17)],
     products: [
         .library(
             name: "WebRTC",

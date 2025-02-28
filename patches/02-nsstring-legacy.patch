@@ -1,0 +1,817 @@
+diff --git a/sdk/objc/api/peerconnection/RTCAudioTrack.mm b/sdk/objc/api/peerconnection/RTCAudioTrack.mm
+index 07a6156117..0274fe2b5d 100644
+--- a/sdk/objc/api/peerconnection/RTCAudioTrack.mm
++++ b/sdk/objc/api/peerconnection/RTCAudioTrack.mm
+@@ -29,7 +29,7 @@
+   RTC_DCHECK(source);
+   RTC_DCHECK(trackId.length);
+ 
+-  std::string nativeId = [NSString stdStringForString:trackId];
++  std::string nativeId = [NSString rtcStdStringForString:trackId];
+   rtc::scoped_refptr<webrtc::AudioTrackInterface> track =
+       factory.nativeFactory->CreateAudioTrack(nativeId,
+                                               source.nativeAudioSource.get());
+diff --git a/sdk/objc/api/peerconnection/RTCDataChannel.mm b/sdk/objc/api/peerconnection/RTCDataChannel.mm
+index ae91cda491..66028864b5 100644
+--- a/sdk/objc/api/peerconnection/RTCDataChannel.mm
++++ b/sdk/objc/api/peerconnection/RTCDataChannel.mm
+@@ -102,7 +102,7 @@ class DataChannelDelegateAdapter : public DataChannelObserver {
+ }
+ 
+ - (NSString *)label {
+-  return [NSString stringForStdString:_nativeDataChannel->label()];
++  return [NSString rtcStringForStdString:_nativeDataChannel->label()];
+ }
+ 
+ - (BOOL)isReliable {
+@@ -134,7 +134,7 @@ class DataChannelDelegateAdapter : public DataChannelObserver {
+ }
+ 
+ - (NSString *)protocol {
+-  return [NSString stringForStdString:_nativeDataChannel->protocol()];
++  return [NSString rtcStringForStdString:_nativeDataChannel->protocol()];
+ }
+ 
+ - (BOOL)isNegotiated {
+diff --git a/sdk/objc/api/peerconnection/RTCDataChannelConfiguration.mm b/sdk/objc/api/peerconnection/RTCDataChannelConfiguration.mm
+index bf775b1afd..57bd96a750 100644
+--- a/sdk/objc/api/peerconnection/RTCDataChannelConfiguration.mm
++++ b/sdk/objc/api/peerconnection/RTCDataChannelConfiguration.mm
+@@ -53,11 +53,11 @@
+ }
+ 
+ - (NSString *)protocol {
+-  return [NSString stringForStdString:_nativeDataChannelInit.protocol];
++  return [NSString rtcStringForStdString:_nativeDataChannelInit.protocol];
+ }
+ 
+ - (void)setProtocol:(NSString *)protocol {
+-  _nativeDataChannelInit.protocol = [NSString stdStringForString:protocol];
++  _nativeDataChannelInit.protocol = [NSString rtcStdStringForString:protocol];
+ }
+ 
+ - (BOOL)isNegotiated {
+diff --git a/sdk/objc/api/peerconnection/RTCDtmfSender.mm b/sdk/objc/api/peerconnection/RTCDtmfSender.mm
+index 484793e377..f77989e15c 100644
+--- a/sdk/objc/api/peerconnection/RTCDtmfSender.mm
++++ b/sdk/objc/api/peerconnection/RTCDtmfSender.mm
+@@ -33,11 +33,11 @@
+   int interToneGapMs =
+       static_cast<int>(interToneGap * rtc::kNumMillisecsPerSec);
+   return _nativeDtmfSender->InsertDtmf(
+-      [NSString stdStringForString:tones], durationMs, interToneGapMs);
++      [NSString rtcStdStringForString:tones], durationMs, interToneGapMs);
+ }
+ 
+ - (nonnull NSString *)remainingTones {
+-  return [NSString stringForStdString:_nativeDtmfSender->tones()];
++  return [NSString rtcStringForStdString:_nativeDtmfSender->tones()];
+ }
+ 
+ - (NSTimeInterval)duration {
+diff --git a/sdk/objc/api/peerconnection/RTCIceCandidate.mm b/sdk/objc/api/peerconnection/RTCIceCandidate.mm
+index 241af297e7..a498930424 100644
+--- a/sdk/objc/api/peerconnection/RTCIceCandidate.mm
++++ b/sdk/objc/api/peerconnection/RTCIceCandidate.mm
+@@ -53,11 +53,11 @@
+   candidate->ToString(&sdp);
+ 
+   RTC_OBJC_TYPE(RTCIceCandidate) *rtcCandidate =
+-      [self initWithSdp:[NSString stringForStdString:sdp]
++      [self initWithSdp:[NSString rtcStringForStdString:sdp]
+           sdpMLineIndex:candidate->sdp_mline_index()
+-                 sdpMid:[NSString stringForStdString:candidate->sdp_mid()]];
++                 sdpMid:[NSString rtcStringForStdString:candidate->sdp_mid()]];
+   rtcCandidate->_serverUrl =
+-      [NSString stringForStdString:candidate->server_url()];
++      [NSString rtcStringForStdString:candidate->server_url()];
+   return rtcCandidate;
+ }
+ 
+diff --git a/sdk/objc/api/peerconnection/RTCIceCandidateErrorEvent.mm b/sdk/objc/api/peerconnection/RTCIceCandidateErrorEvent.mm
+index cef03f2f43..0b0b01dd5d 100644
+--- a/sdk/objc/api/peerconnection/RTCIceCandidateErrorEvent.mm
++++ b/sdk/objc/api/peerconnection/RTCIceCandidateErrorEvent.mm
+@@ -31,11 +31,11 @@
+                       errorText:(const std::string&)errorText {
+   self = [self init];
+   if (self) {
+-    _address = [NSString stringForStdString:address];
++    _address = [NSString rtcStringForStdString:address];
+     _port = port;
+-    _url = [NSString stringForStdString:url];
++    _url = [NSString rtcStringForStdString:url];
+     _errorCode = errorCode;
+-    _errorText = [NSString stringForStdString:errorText];
++    _errorText = [NSString rtcStringForStdString:errorText];
+   }
+   return self;
+ }
+diff --git a/sdk/objc/api/peerconnection/RTCIceServer.mm b/sdk/objc/api/peerconnection/RTCIceServer.mm
+index 96961e33d0..c88b8d100f 100644
+--- a/sdk/objc/api/peerconnection/RTCIceServer.mm
++++ b/sdk/objc/api/peerconnection/RTCIceServer.mm
+@@ -124,9 +124,9 @@
+ - (webrtc::PeerConnectionInterface::IceServer)nativeServer {
+   __block webrtc::PeerConnectionInterface::IceServer iceServer;
+ 
+-  iceServer.username = [NSString stdStringForString:_username];
+-  iceServer.password = [NSString stdStringForString:_credential];
+-  iceServer.hostname = [NSString stdStringForString:_hostname];
++  iceServer.username = [NSString rtcStdStringForString:_username];
++  iceServer.password = [NSString rtcStdStringForString:_credential];
++  iceServer.hostname = [NSString rtcStdStringForString:_hostname];
+ 
+   [_tlsAlpnProtocols enumerateObjectsUsingBlock:^(
+                          NSString *proto, NSUInteger idx, BOOL *stop) {
+@@ -161,20 +161,20 @@
+   NSMutableArray *urls =
+       [NSMutableArray arrayWithCapacity:nativeServer.urls.size()];
+   for (auto const &url : nativeServer.urls) {
+-    [urls addObject:[NSString stringForStdString:url]];
++    [urls addObject:[NSString rtcStringForStdString:url]];
+   }
+-  NSString *username = [NSString stringForStdString:nativeServer.username];
+-  NSString *credential = [NSString stringForStdString:nativeServer.password];
+-  NSString *hostname = [NSString stringForStdString:nativeServer.hostname];
++  NSString *username = [NSString rtcStringForStdString:nativeServer.username];
++  NSString *credential = [NSString rtcStringForStdString:nativeServer.password];
++  NSString *hostname = [NSString rtcStringForStdString:nativeServer.hostname];
+   NSMutableArray *tlsAlpnProtocols =
+       [NSMutableArray arrayWithCapacity:nativeServer.tls_alpn_protocols.size()];
+   for (auto const &proto : nativeServer.tls_alpn_protocols) {
+-    [tlsAlpnProtocols addObject:[NSString stringForStdString:proto]];
++    [tlsAlpnProtocols addObject:[NSString rtcStringForStdString:proto]];
+   }
+   NSMutableArray *tlsEllipticCurves = [NSMutableArray
+       arrayWithCapacity:nativeServer.tls_elliptic_curves.size()];
+   for (auto const &curve : nativeServer.tls_elliptic_curves) {
+-    [tlsEllipticCurves addObject:[NSString stringForStdString:curve]];
++    [tlsEllipticCurves addObject:[NSString rtcStringForStdString:curve]];
+   }
+   RTCTlsCertPolicy tlsCertPolicy;
+ 
+diff --git a/sdk/objc/api/peerconnection/RTCLegacyStatsReport.mm b/sdk/objc/api/peerconnection/RTCLegacyStatsReport.mm
+index 703b44c041..1f34ef8dc9 100644
+--- a/sdk/objc/api/peerconnection/RTCLegacyStatsReport.mm
++++ b/sdk/objc/api/peerconnection/RTCLegacyStatsReport.mm
+@@ -37,17 +37,17 @@
+   self = [super init];
+   if (self) {
+     _timestamp = nativeReport.timestamp();
+-    _type = [NSString stringForStdString:nativeReport.TypeToString()];
+-    _reportId = [NSString stringForStdString:nativeReport.id()->ToString()];
++    _type = [NSString rtcStringForStdString:nativeReport.TypeToString()];
++    _reportId = [NSString rtcStringForStdString:nativeReport.id()->ToString()];
+ 
+     NSUInteger capacity = nativeReport.values().size();
+     NSMutableDictionary *values =
+         [NSMutableDictionary dictionaryWithCapacity:capacity];
+     for (auto const &valuePair : nativeReport.values()) {
+       NSString *key =
+-          [NSString stringForStdString:valuePair.second->display_name()];
++          [NSString rtcStringForStdString:valuePair.second->display_name()];
+       NSString *value =
+-          [NSString stringForStdString:valuePair.second->ToString()];
++          [NSString rtcStringForStdString:valuePair.second->ToString()];
+ 
+       // Not expecting duplicate keys.
+       RTC_DCHECK(![values objectForKey:key]);
+diff --git a/sdk/objc/api/peerconnection/RTCMediaStream.mm b/sdk/objc/api/peerconnection/RTCMediaStream.mm
+index d4b003c30c..956bdc7714 100644
+--- a/sdk/objc/api/peerconnection/RTCMediaStream.mm
++++ b/sdk/objc/api/peerconnection/RTCMediaStream.mm
+@@ -29,7 +29,7 @@
+                        streamId:(NSString *)streamId {
+   NSParameterAssert(factory);
+   NSParameterAssert(streamId.length);
+-  std::string nativeId = [NSString stdStringForString:streamId];
++  std::string nativeId = [NSString rtcStdStringForString:streamId];
+   rtc::scoped_refptr<webrtc::MediaStreamInterface> stream =
+       factory.nativeFactory->CreateLocalMediaStream(nativeId);
+   return [self initWithFactory:factory nativeMediaStream:stream];
+@@ -52,7 +52,7 @@
+ }
+ 
+ - (NSString *)streamId {
+-  return [NSString stringForStdString:_nativeMediaStream->id()];
++  return [NSString rtcStringForStdString:_nativeMediaStream->id()];
+ }
+ 
+ - (void)addAudioTrack:(RTC_OBJC_TYPE(RTCAudioTrack) *)audioTrack {
+diff --git a/sdk/objc/api/peerconnection/RTCMediaStreamTrack.mm b/sdk/objc/api/peerconnection/RTCMediaStreamTrack.mm
+index 76f61d4ccd..37bb1c4368 100644
+--- a/sdk/objc/api/peerconnection/RTCMediaStreamTrack.mm
++++ b/sdk/objc/api/peerconnection/RTCMediaStreamTrack.mm
+@@ -26,11 +26,11 @@ NSString *const kRTCMediaStreamTrackKindVideo =
+ }
+ 
+ - (NSString *)kind {
+-  return [NSString stringForStdString:_nativeTrack->kind()];
++  return [NSString rtcStringForStdString:_nativeTrack->kind()];
+ }
+ 
+ - (NSString *)trackId {
+-  return [NSString stringForStdString:_nativeTrack->id()];
++  return [NSString rtcStringForStdString:_nativeTrack->id()];
+ }
+ 
+ - (BOOL)isEnabled {
+diff --git a/sdk/objc/api/peerconnection/RTCMetricsSampleInfo.mm b/sdk/objc/api/peerconnection/RTCMetricsSampleInfo.mm
+index ea01350122..4c7597ded6 100644
+--- a/sdk/objc/api/peerconnection/RTCMetricsSampleInfo.mm
++++ b/sdk/objc/api/peerconnection/RTCMetricsSampleInfo.mm
+@@ -26,7 +26,7 @@
+     (const webrtc::metrics::SampleInfo &)info {
+   self = [super init];
+   if (self) {
+-    _name = [NSString stringForStdString:info.name];
++    _name = [NSString rtcStringForStdString:info.name];
+     _min = info.min;
+     _max = info.max;
+     _bucketCount = info.bucket_count;
+diff --git a/sdk/objc/api/peerconnection/RTCPeerConnection+DataChannel.mm b/sdk/objc/api/peerconnection/RTCPeerConnection+DataChannel.mm
+index ea56598774..02ea9235c3 100644
+--- a/sdk/objc/api/peerconnection/RTCPeerConnection+DataChannel.mm
++++ b/sdk/objc/api/peerconnection/RTCPeerConnection+DataChannel.mm
+@@ -20,7 +20,7 @@
+     - (nullable RTC_OBJC_TYPE(RTCDataChannel) *)dataChannelForLabel
+     : (NSString *)label configuration
+     : (RTC_OBJC_TYPE(RTCDataChannelConfiguration) *)configuration {
+-  std::string labelString = [NSString stdStringForString:label];
++  std::string labelString = [NSString rtcStdStringForString:label];
+   const webrtc::DataChannelInit nativeInit =
+       configuration.nativeDataChannelInit;
+   auto result = self.nativePeerConnection->CreateDataChannelOrError(
+diff --git a/sdk/objc/api/peerconnection/RTCPeerConnection.mm b/sdk/objc/api/peerconnection/RTCPeerConnection.mm
+index af9a38a97f..2198bfe88e 100644
+--- a/sdk/objc/api/peerconnection/RTCPeerConnection.mm
++++ b/sdk/objc/api/peerconnection/RTCPeerConnection.mm
+@@ -66,7 +66,7 @@ class SetSessionDescriptionObserver
+       completion_handler_(nil);
+     } else {
+       // TODO(hta): Add handling of error.type()
+-      NSString *str = [NSString stringForStdString:error.message()];
++      NSString *str = [NSString rtcStringForStdString:error.message()];
+       NSError *err =
+           [NSError errorWithDomain:kRTCPeerConnectionErrorDomain
+                               code:kRTCPeerConnnectionSessionDescriptionError
+@@ -109,7 +109,7 @@ class CreateSessionDescriptionObserverAdapter
+   void OnFailure(RTCError error) override {
+     RTC_DCHECK(completion_handler_);
+     // TODO(hta): Add handling of error.type()
+-    NSString *str = [NSString stringForStdString:error.message()];
++    NSString *str = [NSString rtcStringForStdString:error.message()];
+     NSError *err =
+         [NSError errorWithDomain:kRTCPeerConnectionErrorDomain
+                             code:kRTCPeerConnnectionSessionDescriptionError
+@@ -405,7 +405,7 @@ void PeerConnectionDelegateAdapter::OnIceSelectedCandidatePairChanged(
+   RTC_OBJC_TYPE(RTCIceCandidate) *remote_candidate =
+       [[RTC_OBJC_TYPE(RTCIceCandidate) alloc]
+           initWithNativeCandidate:&remote_candidate_wrapper];
+-  NSString *nsstr_reason = [NSString stringForStdString:event.reason];
++  NSString *nsstr_reason = [NSString rtcStringForStdString:event.reason];
+   if ([delegate respondsToSelector:@selector
+                 (peerConnection:
+                     didChangeLocalCandidate:remoteCandidate:lastReceivedMs
+@@ -626,7 +626,7 @@ void PeerConnectionDelegateAdapter::OnRemoveTrack(
+         if (error.ok()) {
+           completionHandler(nil);
+         } else {
+-          NSString *str = [NSString stringForStdString:error.message()];
++          NSString *str = [NSString rtcStringForStdString:error.message()];
+           NSError *err =
+               [NSError errorWithDomain:kRTCPeerConnectionErrorDomain
+                                   code:static_cast<NSInteger>(error.type())
+@@ -849,8 +849,8 @@ void PeerConnectionDelegateAdapter::OnRemoveTrack(
+ 
+ - (RTC_OBJC_TYPE(RTCRtpSender) *)senderWithKind:(NSString *)kind
+                                        streamId:(NSString *)streamId {
+-  std::string nativeKind = [NSString stdStringForString:kind];
+-  std::string nativeStreamId = [NSString stdStringForString:streamId];
++  std::string nativeKind = [NSString rtcStdStringForString:kind];
++  std::string nativeStreamId = [NSString rtcStdStringForString:streamId];
+   rtc::scoped_refptr<webrtc::RtpSenderInterface> nativeSender(
+       _peerConnection->CreateSender(nativeKind, nativeStreamId));
+   return nativeSender ?
+diff --git a/sdk/objc/api/peerconnection/RTCRtcpParameters.mm b/sdk/objc/api/peerconnection/RTCRtcpParameters.mm
+index 7bb5d85594..9b6f22cd9c 100644
+--- a/sdk/objc/api/peerconnection/RTCRtcpParameters.mm
++++ b/sdk/objc/api/peerconnection/RTCRtcpParameters.mm
+@@ -26,7 +26,7 @@
+     (const webrtc::RtcpParameters &)nativeParameters {
+   self = [super init];
+   if (self) {
+-    _cname = [NSString stringForStdString:nativeParameters.cname];
++    _cname = [NSString rtcStringForStdString:nativeParameters.cname];
+     _isReducedSize = nativeParameters.reduced_size;
+   }
+   return self;
+@@ -34,7 +34,7 @@
+ 
+ - (webrtc::RtcpParameters)nativeParameters {
+   webrtc::RtcpParameters parameters;
+-  parameters.cname = [NSString stdStringForString:_cname];
++  parameters.cname = [NSString rtcStdStringForString:_cname];
+   parameters.reduced_size = _isReducedSize;
+   return parameters;
+ }
+diff --git a/sdk/objc/api/peerconnection/RTCRtpCodecCapability.mm b/sdk/objc/api/peerconnection/RTCRtpCodecCapability.mm
+index f6f72e859b..14cbfcbc95 100644
+--- a/sdk/objc/api/peerconnection/RTCRtpCodecCapability.mm
++++ b/sdk/objc/api/peerconnection/RTCRtpCodecCapability.mm
+@@ -39,7 +39,7 @@
+       _preferredPayloadType = [NSNumber
+           numberWithInt:*nativeRtpCodecCapability.preferred_payload_type];
+     }
+-    _name = [NSString stringForStdString:nativeRtpCodecCapability.name];
++    _name = [NSString rtcStringForStdString:nativeRtpCodecCapability.name];
+     switch (nativeRtpCodecCapability.kind) {
+       case cricket::MEDIA_TYPE_AUDIO:
+         _kind = kRTCMediaStreamTrackKindAudio;
+@@ -64,12 +64,12 @@
+     }
+     NSMutableDictionary *parameters = [NSMutableDictionary dictionary];
+     for (const auto &parameter : nativeRtpCodecCapability.parameters) {
+-      [parameters setObject:[NSString stringForStdString:parameter.second]
+-                     forKey:[NSString stringForStdString:parameter.first]];
++      [parameters setObject:[NSString rtcStringForStdString:parameter.second]
++                     forKey:[NSString rtcStringForStdString:parameter.first]];
+     }
+     _parameters = parameters;
+     _mimeType =
+-        [NSString stringForStdString:nativeRtpCodecCapability.mime_type()];
++        [NSString rtcStringForStdString:nativeRtpCodecCapability.mime_type()];
+   }
+   return self;
+ }
+@@ -95,7 +95,7 @@
+     rtpCodecCapability.preferred_payload_type =
+         std::optional<int>(_preferredPayloadType.intValue);
+   }
+-  rtpCodecCapability.name = [NSString stdStringForString:_name];
++  rtpCodecCapability.name = [NSString rtcStdStringForString:_name];
+   // NSString pointer comparison is safe here since "kind" is readonly and only
+   // populated above.
+   if (_kind == kRTCMediaStreamTrackKindAudio) {
+@@ -112,8 +112,8 @@
+     rtpCodecCapability.num_channels = std::optional<int>(_numChannels.intValue);
+   }
+   for (NSString *paramKey in _parameters.allKeys) {
+-    std::string key = [NSString stdStringForString:paramKey];
+-    std::string value = [NSString stdStringForString:_parameters[paramKey]];
++    std::string key = [NSString rtcStdStringForString:paramKey];
++    std::string value = [NSString rtcStdStringForString:_parameters[paramKey]];
+     rtpCodecCapability.parameters[key] = value;
+   }
+   return rtpCodecCapability;
+diff --git a/sdk/objc/api/peerconnection/RTCRtpCodecParameters.mm b/sdk/objc/api/peerconnection/RTCRtpCodecParameters.mm
+index 8684d4b61a..670c81cfd6 100644
+--- a/sdk/objc/api/peerconnection/RTCRtpCodecParameters.mm
++++ b/sdk/objc/api/peerconnection/RTCRtpCodecParameters.mm
+@@ -52,7 +52,7 @@ const NSString *const kRTCH264CodecName = @(cricket::kH264CodecName);
+   self = [super init];
+   if (self) {
+     _payloadType = nativeParameters.payload_type;
+-    _name = [NSString stringForStdString:nativeParameters.name];
++    _name = [NSString rtcStringForStdString:nativeParameters.name];
+     switch (nativeParameters.kind) {
+       case cricket::MEDIA_TYPE_AUDIO:
+         _kind = kRTCMediaStreamTrackKindAudio;
+@@ -75,8 +75,8 @@ const NSString *const kRTCH264CodecName = @(cricket::kH264CodecName);
+     }
+     NSMutableDictionary *parameters = [NSMutableDictionary dictionary];
+     for (const auto &parameter : nativeParameters.parameters) {
+-      [parameters setObject:[NSString stringForStdString:parameter.second]
+-                     forKey:[NSString stringForStdString:parameter.first]];
++      [parameters setObject:[NSString rtcStringForStdString:parameter.second]
++                     forKey:[NSString rtcStringForStdString:parameter.first]];
+     }
+     _parameters = parameters;
+   }
+@@ -86,7 +86,7 @@ const NSString *const kRTCH264CodecName = @(cricket::kH264CodecName);
+ - (webrtc::RtpCodecParameters)nativeParameters {
+   webrtc::RtpCodecParameters parameters;
+   parameters.payload_type = _payloadType;
+-  parameters.name = [NSString stdStringForString:_name];
++  parameters.name = [NSString rtcStdStringForString:_name];
+   // NSString pointer comparison is safe here since "kind" is readonly and only
+   // populated above.
+   if (_kind == kRTCMediaStreamTrackKindAudio) {
+@@ -103,8 +103,8 @@ const NSString *const kRTCH264CodecName = @(cricket::kH264CodecName);
+     parameters.num_channels = std::optional<int>(_numChannels.intValue);
+   }
+   for (NSString *paramKey in _parameters.allKeys) {
+-    std::string key = [NSString stdStringForString:paramKey];
+-    std::string value = [NSString stdStringForString:_parameters[paramKey]];
++    std::string key = [NSString rtcStdStringForString:paramKey];
++    std::string value = [NSString rtcStdStringForString:_parameters[paramKey]];
+     parameters.parameters[key] = value;
+   }
+   return parameters;
+diff --git a/sdk/objc/api/peerconnection/RTCRtpEncodingParameters.mm b/sdk/objc/api/peerconnection/RTCRtpEncodingParameters.mm
+index 49ae8a192c..52437e2929 100644
+--- a/sdk/objc/api/peerconnection/RTCRtpEncodingParameters.mm
++++ b/sdk/objc/api/peerconnection/RTCRtpEncodingParameters.mm
+@@ -36,7 +36,7 @@
+   self = [super init];
+   if (self) {
+     if (!nativeParameters.rid.empty()) {
+-      _rid = [NSString stringForStdString:nativeParameters.rid];
++      _rid = [NSString rtcStringForStdString:nativeParameters.rid];
+     }
+     _isActive = nativeParameters.active;
+     if (nativeParameters.max_bitrate_bps) {
+@@ -72,7 +72,7 @@
+ - (webrtc::RtpEncodingParameters)nativeParameters {
+   webrtc::RtpEncodingParameters parameters;
+   if (_rid != nil) {
+-    parameters.rid = [NSString stdStringForString:_rid];
++    parameters.rid = [NSString rtcStdStringForString:_rid];
+   }
+   parameters.active = _isActive;
+   if (_maxBitrateBps != nil) {
+diff --git a/sdk/objc/api/peerconnection/RTCRtpHeaderExtension.mm b/sdk/objc/api/peerconnection/RTCRtpHeaderExtension.mm
+index c399619fee..01d15aad4c 100644
+--- a/sdk/objc/api/peerconnection/RTCRtpHeaderExtension.mm
++++ b/sdk/objc/api/peerconnection/RTCRtpHeaderExtension.mm
+@@ -27,7 +27,7 @@
+     (const webrtc::RtpExtension &)nativeParameters {
+   self = [super init];
+   if (self) {
+-    _uri = [NSString stringForStdString:nativeParameters.uri];
++    _uri = [NSString rtcStringForStdString:nativeParameters.uri];
+     _id = nativeParameters.id;
+     _encrypted = nativeParameters.encrypt;
+   }
+@@ -36,7 +36,7 @@
+ 
+ - (webrtc::RtpExtension)nativeParameters {
+   webrtc::RtpExtension extension;
+-  extension.uri = [NSString stdStringForString:_uri];
++  extension.uri = [NSString rtcStdStringForString:_uri];
+   extension.id = _id;
+   extension.encrypt = _encrypted;
+   return extension;
+diff --git a/sdk/objc/api/peerconnection/RTCRtpHeaderExtensionCapability.mm b/sdk/objc/api/peerconnection/RTCRtpHeaderExtensionCapability.mm
+index 9ecc3d0bc4..a68efda3b7 100644
+--- a/sdk/objc/api/peerconnection/RTCRtpHeaderExtensionCapability.mm
++++ b/sdk/objc/api/peerconnection/RTCRtpHeaderExtensionCapability.mm
+@@ -31,7 +31,7 @@
+         nativeRtpHeaderExtensionCapability {
+   self = [super init];
+   if (self) {
+-    _uri = [NSString stringForStdString:nativeRtpHeaderExtensionCapability.uri];
++    _uri = [NSString rtcStringForStdString:nativeRtpHeaderExtensionCapability.uri];
+     if (nativeRtpHeaderExtensionCapability.preferred_id) {
+       _preferredId = [NSNumber
+           numberWithInt:*nativeRtpHeaderExtensionCapability.preferred_id];
+@@ -56,7 +56,7 @@
+ 
+ - (webrtc::RtpHeaderExtensionCapability)nativeRtpHeaderExtensionCapability {
+   webrtc::RtpHeaderExtensionCapability rtpHeaderExtensionCapability;
+-  rtpHeaderExtensionCapability.uri = [NSString stdStringForString:_uri];
++  rtpHeaderExtensionCapability.uri = [NSString rtcStdStringForString:_uri];
+   if (_preferredId != nil) {
+     rtpHeaderExtensionCapability.preferred_id =
+         std::optional<int>(_preferredId.intValue);
+diff --git a/sdk/objc/api/peerconnection/RTCRtpParameters.mm b/sdk/objc/api/peerconnection/RTCRtpParameters.mm
+index dd7b0deab5..d8bcc24dfb 100644
+--- a/sdk/objc/api/peerconnection/RTCRtpParameters.mm
++++ b/sdk/objc/api/peerconnection/RTCRtpParameters.mm
+@@ -35,7 +35,7 @@
+   self = [super init];
+   if (self) {
+     _transactionId =
+-        [NSString stringForStdString:nativeParameters.transaction_id];
++        [NSString rtcStringForStdString:nativeParameters.transaction_id];
+     _rtcp = [[RTC_OBJC_TYPE(RTCRtcpParameters) alloc]
+         initWithNativeParameters:nativeParameters.rtcp];
+ 
+@@ -70,7 +70,7 @@
+ 
+ - (webrtc::RtpParameters)nativeParameters {
+   webrtc::RtpParameters parameters;
+-  parameters.transaction_id = [NSString stdStringForString:_transactionId];
++  parameters.transaction_id = [NSString rtcStdStringForString:_transactionId];
+   parameters.rtcp = [_rtcp nativeParameters];
+   for (RTC_OBJC_TYPE(RTCRtpHeaderExtension) *
+        headerExtension in _headerExtensions) {
+diff --git a/sdk/objc/api/peerconnection/RTCRtpReceiver.mm b/sdk/objc/api/peerconnection/RTCRtpReceiver.mm
+index bb5b01d16b..50c254e827 100644
+--- a/sdk/objc/api/peerconnection/RTCRtpReceiver.mm
++++ b/sdk/objc/api/peerconnection/RTCRtpReceiver.mm
+@@ -47,7 +47,7 @@ void RtpReceiverDelegateAdapter::OnFirstPacketReceived(
+ @synthesize delegate = _delegate;
+ 
+ - (NSString *)receiverId {
+-  return [NSString stringForStdString:_nativeRtpReceiver->id()];
++  return [NSString rtcStringForStdString:_nativeRtpReceiver->id()];
+ }
+ 
+ - (RTC_OBJC_TYPE(RTCRtpParameters) *)parameters {
+diff --git a/sdk/objc/api/peerconnection/RTCRtpSender.mm b/sdk/objc/api/peerconnection/RTCRtpSender.mm
+index 08ab9ed404..cf269926c3 100644
+--- a/sdk/objc/api/peerconnection/RTCRtpSender.mm
++++ b/sdk/objc/api/peerconnection/RTCRtpSender.mm
+@@ -27,7 +27,7 @@
+ @synthesize dtmfSender = _dtmfSender;
+ 
+ - (NSString *)senderId {
+-  return [NSString stringForStdString:_nativeRtpSender->id()];
++  return [NSString rtcStringForStdString:_nativeRtpSender->id()];
+ }
+ 
+ - (RTC_OBJC_TYPE(RTCRtpParameters) *)parameters {
+@@ -68,7 +68,7 @@
+   NSMutableArray *streamIds =
+       [NSMutableArray arrayWithCapacity:nativeStreamIds.size()];
+   for (const auto &s : nativeStreamIds) {
+-    [streamIds addObject:[NSString stringForStdString:s]];
++    [streamIds addObject:[NSString rtcStringForStdString:s]];
+   }
+   return streamIds;
+ }
+diff --git a/sdk/objc/api/peerconnection/RTCRtpTransceiver.mm b/sdk/objc/api/peerconnection/RTCRtpTransceiver.mm
+index 16766623b8..0a9c940c46 100644
+--- a/sdk/objc/api/peerconnection/RTCRtpTransceiver.mm
++++ b/sdk/objc/api/peerconnection/RTCRtpTransceiver.mm
+@@ -65,7 +65,7 @@ NSString *const kRTCRtpTransceiverErrorDomain = @"org.webrtc.RTCRtpTranceiver";
+ 
+ - (NSString *)mid {
+   if (_nativeRtpTransceiver->mid()) {
+-    return [NSString stringForStdString:*_nativeRtpTransceiver->mid()];
++    return [NSString rtcStringForStdString:*_nativeRtpTransceiver->mid()];
+   } else {
+     return nil;
+   }
+diff --git a/sdk/objc/api/peerconnection/RTCSessionDescription.mm b/sdk/objc/api/peerconnection/RTCSessionDescription.mm
+index a62f4c7f29..aae927ce8e 100644
+--- a/sdk/objc/api/peerconnection/RTCSessionDescription.mm
++++ b/sdk/objc/api/peerconnection/RTCSessionDescription.mm
+@@ -23,7 +23,7 @@
+ 
+ + (NSString *)stringForType:(RTCSdpType)type {
+   std::string string = [[self class] stdStringForType:type];
+-  return [NSString stringForStdString:string];
++  return [NSString rtcStringForStdString:string];
+ }
+ 
+ + (RTCSdpType)typeForString:(NSString *)string {
+@@ -72,7 +72,7 @@
+   nativeDescription->ToString(&sdp);
+   RTCSdpType type = [[self class] typeForStdString:nativeDescription->type()];
+ 
+-  return [self initWithType:type sdp:[NSString stringForStdString:sdp]];
++  return [self initWithType:type sdp:[NSString rtcStringForStdString:sdp]];
+ }
+ 
+ + (std::string)stdStringForType:(RTCSdpType)type {
+diff --git a/sdk/objc/api/peerconnection/RTCStatisticsReport.mm b/sdk/objc/api/peerconnection/RTCStatisticsReport.mm
+index 68aac57f97..f2286c6342 100644
+--- a/sdk/objc/api/peerconnection/RTCStatisticsReport.mm
++++ b/sdk/objc/api/peerconnection/RTCStatisticsReport.mm
+@@ -35,7 +35,7 @@ NSObject *ValueFromStatsAttribute(const Attribute &attribute) {
+   } else if (attribute.holds_alternative<double>()) {
+     return [NSNumber numberWithDouble:attribute.get<double>()];
+   } else if (attribute.holds_alternative<std::string>()) {
+-    return [NSString stringForStdString:attribute.get<std::string>()];
++    return [NSString rtcStringForStdString:attribute.get<std::string>()];
+   } else if (attribute.holds_alternative<std::vector<bool>>()) {
+     std::vector<bool> sequence = attribute.get<std::vector<bool>>();
+     NSMutableArray *array = [NSMutableArray arrayWithCapacity:sequence.size()];
+@@ -89,7 +89,7 @@ NSObject *ValueFromStatsAttribute(const Attribute &attribute) {
+     NSMutableArray<NSString *> *array =
+         [NSMutableArray arrayWithCapacity:sequence.size()];
+     for (const auto &item : sequence) {
+-      [array addObject:[NSString stringForStdString:item]];
++      [array addObject:[NSString rtcStringForStdString:item]];
+     }
+     return [array copy];
+   } else if (attribute.holds_alternative<std::map<std::string, uint64_t>>()) {
+@@ -98,7 +98,7 @@ NSObject *ValueFromStatsAttribute(const Attribute &attribute) {
+     NSMutableDictionary<NSString *, NSNumber *> *dictionary =
+         [NSMutableDictionary dictionaryWithCapacity:map.size()];
+     for (const auto &item : map) {
+-      dictionary[[NSString stringForStdString:item.first]] = @(item.second);
++      dictionary[[NSString rtcStringForStdString:item.first]] = @(item.second);
+     }
+     return [dictionary copy];
+   } else if (attribute.holds_alternative<std::map<std::string, double>>()) {
+@@ -107,7 +107,7 @@ NSObject *ValueFromStatsAttribute(const Attribute &attribute) {
+     NSMutableDictionary<NSString *, NSNumber *> *dictionary =
+         [NSMutableDictionary dictionaryWithCapacity:map.size()];
+     for (const auto &item : map) {
+-      dictionary[[NSString stringForStdString:item.first]] = @(item.second);
++      dictionary[[NSString rtcStringForStdString:item.first]] = @(item.second);
+     }
+     return [dictionary copy];
+   }
+@@ -126,7 +126,7 @@ NSObject *ValueFromStatsAttribute(const Attribute &attribute) {
+ - (instancetype)initWithStatistics:(const webrtc::RTCStats &)statistics {
+   self = [super init];
+   if (self) {
+-    _id = [NSString stringForStdString:statistics.id()];
++    _id = [NSString rtcStringForStdString:statistics.id()];
+     _timestamp_us = statistics.timestamp().us();
+     _type = [NSString stringWithCString:statistics.type()
+                                encoding:NSUTF8StringEncoding];
+diff --git a/sdk/objc/api/peerconnection/RTCVideoCodecInfo+Private.mm b/sdk/objc/api/peerconnection/RTCVideoCodecInfo+Private.mm
+index 8a977a3447..78f6d0ca7d 100644
+--- a/sdk/objc/api/peerconnection/RTCVideoCodecInfo+Private.mm
++++ b/sdk/objc/api/peerconnection/RTCVideoCodecInfo+Private.mm
+@@ -21,8 +21,8 @@
+     : (webrtc::SdpVideoFormat)format {
+   NSMutableDictionary* params = [NSMutableDictionary dictionary];
+   for (const auto& [key, value] : format.parameters) {
+-    [params setObject:[NSString stringForStdString:value]
+-               forKey:[NSString stringForStdString:key]];
++    [params setObject:[NSString rtcStringForStdString:value]
++               forKey:[NSString rtcStringForStdString:key]];
+   }
+ 
+   NSMutableArray<NSString*>* scalabilityModes =
+@@ -33,7 +33,7 @@
+                       stringForAbslStringView:ScalabilityModeToString(mode)]];
+   }
+ 
+-  return [self initWithName:[NSString stringForStdString:format.name]
++  return [self initWithName:[NSString rtcStringForStdString:format.name]
+                  parameters:params
+            scalabilityModes:scalabilityModes];
+ }
+@@ -41,8 +41,8 @@
+ - (webrtc::SdpVideoFormat)nativeSdpVideoFormat {
+   std::map<std::string, std::string> parameters;
+   for (NSString* paramKey in self.parameters.allKeys) {
+-    std::string key = [NSString stdStringForString:paramKey];
+-    std::string value = [NSString stdStringForString:self.parameters[paramKey]];
++    std::string key = [NSString rtcStdStringForString:paramKey];
++    std::string value = [NSString rtcStdStringForString:self.parameters[paramKey]];
+     parameters[key] = value;
+   }
+ 
+@@ -51,14 +51,14 @@
+   for (NSString* mode_name in self.scalabilityModes) {
+     std::optional<webrtc::ScalabilityMode> mode =
+         webrtc::ScalabilityModeStringToEnum(
+-            [NSString stdStringForString:mode_name]);
++            [NSString rtcStdStringForString:mode_name]);
+     if (mode.has_value()) {
+       scalability_modes.push_back(*mode);
+     }
+   }
+ 
+   return webrtc::SdpVideoFormat(
+-      [NSString stdStringForString:self.name], parameters, scalability_modes);
++      [NSString rtcStdStringForString:self.name], parameters, scalability_modes);
+ }
+ 
+ @end
+diff --git a/sdk/objc/api/peerconnection/RTCVideoTrack.mm b/sdk/objc/api/peerconnection/RTCVideoTrack.mm
+index fcdfbb1dde..bd73274660 100644
+--- a/sdk/objc/api/peerconnection/RTCVideoTrack.mm
++++ b/sdk/objc/api/peerconnection/RTCVideoTrack.mm
+@@ -30,7 +30,7 @@
+   NSParameterAssert(factory);
+   NSParameterAssert(source);
+   NSParameterAssert(trackId.length);
+-  std::string nativeId = [NSString stdStringForString:trackId];
++  std::string nativeId = [NSString rtcStdStringForString:trackId];
+   rtc::scoped_refptr<webrtc::VideoTrackInterface> track =
+       factory.nativeFactory->CreateVideoTrack(source.nativeVideoSource,
+                                               nativeId);
+diff --git a/sdk/objc/components/video_codec/RTCH264ProfileLevelId.mm b/sdk/objc/components/video_codec/RTCH264ProfileLevelId.mm
+index a15bb6a137..242d479926 100644
+--- a/sdk/objc/components/video_codec/RTCH264ProfileLevelId.mm
++++ b/sdk/objc/components/video_codec/RTCH264ProfileLevelId.mm
+@@ -45,7 +45,7 @@ NSString *MaxSupportedLevelForProfile(webrtc::H264Profile profile) {
+     const std::optional<std::string> profileString = H264ProfileLevelIdToString(
+         webrtc::H264ProfileLevelId(profile, profileLevelId->level));
+     if (profileString) {
+-      return [NSString stringForStdString:*profileString];
++      return [NSString rtcStringForStdString:*profileString];
+     }
+   }
+   return nil;
+diff --git a/sdk/objc/helpers/NSString+StdString.h b/sdk/objc/helpers/NSString+StdString.h
+index b0324e8a19..fdb5208943 100644
+--- a/sdk/objc/helpers/NSString+StdString.h
++++ b/sdk/objc/helpers/NSString+StdString.h
+@@ -20,8 +20,8 @@ NS_ASSUME_NONNULL_BEGIN
+ 
+ @property(nonatomic, readonly) std::string stdString;
+ 
+-+ (std::string)stdStringForString:(NSString *)nsString;
+-+ (NSString *)stringForStdString:(const std::string &)stdString;
+++ (std::string)rtcStdStringForString:(NSString *)nsString;
+++ (NSString *)rtcStringForStdString:(const std::string &)stdString;
+ 
+ @end
+ 
+diff --git a/sdk/objc/helpers/NSString+StdString.mm b/sdk/objc/helpers/NSString+StdString.mm
+index 5c2d208b9c..93dca0e77a 100644
+--- a/sdk/objc/helpers/NSString+StdString.mm
++++ b/sdk/objc/helpers/NSString+StdString.mm
+@@ -14,17 +14,17 @@
+ 
+ @implementation NSString (StdString)
+ 
+-- (std::string)stdString {
+-  return [NSString stdStringForString:self];
++- (std::string)rtcStdString {
++  return [NSString rtcStdStringForString:self];
+ }
+ 
+-+ (std::string)stdStringForString:(NSString *)nsString {
+++ (std::string)rtcStdStringForString:(NSString *)nsString {
+   NSData *charData = [nsString dataUsingEncoding:NSUTF8StringEncoding];
+   return std::string(reinterpret_cast<const char *>(charData.bytes),
+                      charData.length);
+ }
+ 
+-+ (NSString *)stringForStdString:(const std::string &)stdString {
+++ (NSString *)rtcStringForStdString:(const std::string &)stdString {
+   // std::string may contain null termination character so we construct
+   // using length.
+   return [[NSString alloc] initWithBytes:stdString.data()
+diff --git a/sdk/objc/unittests/RTCIceServerTest.mm b/sdk/objc/unittests/RTCIceServerTest.mm
+index 29163961da..1db28d8fea 100644
+--- a/sdk/objc/unittests/RTCIceServerTest.mm
++++ b/sdk/objc/unittests/RTCIceServerTest.mm
+@@ -128,10 +128,10 @@
+       [[RTC_OBJC_TYPE(RTCIceServer) alloc] initWithNativeServer:nativeServer];
+   EXPECT_EQ(1u, iceServer.urlStrings.count);
+   EXPECT_EQ("stun:stun.example.net",
+-            [NSString stdStringForString:iceServer.urlStrings.firstObject]);
+-  EXPECT_EQ("username", [NSString stdStringForString:iceServer.username]);
+-  EXPECT_EQ("password", [NSString stdStringForString:iceServer.credential]);
+-  EXPECT_EQ("hostname", [NSString stdStringForString:iceServer.hostname]);
++            [NSString rtcStdStringForString:iceServer.urlStrings.firstObject]);
++  EXPECT_EQ("username", [NSString rtcStdStringForString:iceServer.username]);
++  EXPECT_EQ("password", [NSString rtcStdStringForString:iceServer.credential]);
++  EXPECT_EQ("hostname", [NSString rtcStdStringForString:iceServer.hostname]);
+   EXPECT_EQ(2u, iceServer.tlsAlpnProtocols.count);
+   EXPECT_EQ(2u, iceServer.tlsEllipticCurves.count);
+ }
+diff --git a/test/ios/test_support.mm b/test/ios/test_support.mm
+index df8f9df843..5ce82651ba 100644
+--- a/test/ios/test_support.mm
++++ b/test/ios/test_support.mm
+@@ -113,7 +113,7 @@ static std::optional<std::vector<std::string>> g_metrics_to_plot;
+ 
+         exporters.push_back(
+             std::make_unique<webrtc::test::ChromePerfDashboardMetricsExporter>(
+-                [NSString stdStringForString:outputPath]));
++                [NSString rtcStdStringForString:outputPath]));
+       }
+     }
+     if (!g_webrtc_test_metrics_output_path.empty()) {
+@@ -130,7 +130,7 @@ static std::optional<std::vector<std::string>> g_metrics_to_plot;
+         exporters.push_back(
+             std::make_unique<webrtc::test::MetricsSetProtoFileExporter>(
+                 webrtc::test::MetricsSetProtoFileExporter::Options(
+-                    [NSString stdStringForString:outputPath])));
++                    [NSString rtcStdStringForString:outputPath])));
+       }
+     }
+   } else {
+@@ -148,7 +148,7 @@ static std::optional<std::vector<std::string>> g_metrics_to_plot;
+             [outputDirectories[0] stringByAppendingPathComponent:fileName];
+ 
+         if (!webrtc::test::WritePerfResults(
+-                [NSString stdStringForString:outputPath])) {
++                [NSString rtcStdStringForString:outputPath])) {
+           return 1;
+         }
+       }
+diff --git a/test/testsupport/ios_file_utils.mm b/test/testsupport/ios_file_utils.mm
+index 5c5c7f092a..06b27c4d59 100644
+--- a/test/testsupport/ios_file_utils.mm
++++ b/test/testsupport/ios_file_utils.mm
+@@ -33,14 +33,14 @@ std::string IOSResourcePath(absl::string_view name,
+     // Get full pathname for the resource identified by the name and extension.
+     NSString* pathString = [[NSBundle mainBundle] pathForResource:fileName
+                                                            ofType:fileType];
+-    return [NSString stdStringForString:pathString];
++    return [NSString rtcStdStringForString:pathString];
+   }
+ }
+ 
+ std::string IOSRootPath() {
+   @autoreleasepool {
+     NSBundle* mainBundle = [NSBundle mainBundle];
+-    return [NSString stdStringForString:mainBundle.bundlePath] + "/";
++    return [NSString rtcStdStringForString:mainBundle.bundlePath] + "/";
+   }
+ }
+ 
+@@ -51,7 +51,7 @@ std::string IOSOutputPath() {
+   @autoreleasepool {
+     NSString* tempDir = NSTemporaryDirectory();
+     if (tempDir == nil) tempDir = @"/tmp";
+-    return [NSString stdStringForString:tempDir];
++    return [NSString rtcStdStringForString:tempDir];
+   }
+ }
+ 

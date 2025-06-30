@@ -1,0 +1,13 @@
+diff --git a/p2p/base/port_allocator.h b/p2p/base/port_allocator.h
+index 3b957720ef..fe5bce47b6 100644
+--- a/p2p/base/port_allocator.h
++++ b/p2p/base/port_allocator.h
+@@ -103,7 +103,7 @@ enum class IceRegatheringReason {
+ 
+ const uint32_t kDefaultPortAllocatorFlags = 0;
+ 
+-const uint32_t kDefaultStepDelay = 1000;  // 1 sec step delay.
++const uint32_t kDefaultStepDelay = 500;  // 1 sec step delay.
+ // As per RFC 5245 Appendix B.1, STUN transactions need to be paced at certain
+ // internal. Less than 20ms is not acceptable. We choose 50ms as our default.
+ const uint32_t kMinimumStepDelay = 50;

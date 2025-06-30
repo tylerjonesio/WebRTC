@@ -9,7 +9,7 @@
 # Configs
 DEBUG="${DEBUG:-false}"
 BUILD_VP9="${BUILD_VP9:-true}"
-BRANCH="${BRANCH:-cd3e2951ff0f36fa12bea747862c52533a2b39f3}"
+BRANCH="${BRANCH:-cec4daea7ed5da94fc38d790bd12694c86865447}"
 IOS="${IOS:-true}"
 TVOS="${TVOS:-true}"
 MACOS="${MACOS:-true}"
@@ -31,13 +31,6 @@ build_iOS() {
 }
 
 build_tvOS() {
-
-    echo "Fixing SDK info checks to allow for tvOS..."
-    sed -i -- "s/\'macosx\', \'watchos\'/\'macosx\', \'appletvos\', \'appletvsimulator\', \'watchos\'/g" build/config/apple/sdk_info.py
-    sed -i -- "s/\'iphonesimulator\', \'macosx\'/\'iphonesimulator\', \'appletvos\', \'appletvsimulator\', \'macosx\'/g" build/config/apple/sdk_info.py
-    sed -i -- "s/watchos/appletvos/g" build/config/apple/codesign.py
-    sed -i -- "s/watchsimulator/appletvsimulator/g" build/config/apple/codesign.py
-
     local arch=$1
     local environment=$2
     local gen_dir="${OUTPUT_DIR}/tvos-${arch}-${environment}"
@@ -144,10 +137,6 @@ for filename in ../patches/*.patch; do
     echo "Applying patch $filename..."
     git apply $filename
 done
-
-# Current tagged version has build issues with tvOS. Using newer version to bypass build issues.
-echo "Fixing perfetto ref for tvOS..."
-sed -i -- "s/c8812a34b1527871a8ce8bba753cd46c276ed4e2/25c2a683395d64a9c257aa1e3b1ee62340ffaf7d/g" DEPS
 
 cd ..
 gclient sync --with_branch_heads --with_tags

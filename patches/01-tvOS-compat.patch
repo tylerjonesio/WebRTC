@@ -166,15 +166,11 @@ index 788e8c3e3eb4be100c5552c500178340d316dd46..3db184fdbb4e6738ebbbb84f61cf4386
  @interface RTC_OBJC_TYPE (RTCCameraPreviewView) : UIView
  
 diff --git a/sdk/objc/helpers/RTCCameraPreviewView.m b/sdk/objc/helpers/RTCCameraPreviewView.m
-index 3314322b992db1e8cfa217de1ae8d8c794df4f5b..d56ca5fd63879d6e7c3793fee0b5b37309d18e67 100644
+index 3314322b99..6b8514ce5c 100644
 --- a/sdk/objc/helpers/RTCCameraPreviewView.m
 +++ b/sdk/objc/helpers/RTCCameraPreviewView.m
-@@ -80,10 +80,11 @@
- }
- 
- - (void)setCorrectVideoOrientation {
--  if (@available(iOS 17, *)) {
-+  if (@available(iOS 17, tvOS 17, *)) {
+@@ -83,7 +83,8 @@
+   if (@available(iOS 17, *)) {
      [self modifyVideoAngle];
    }
 -#if !defined(__IPHONE_17_0) || __IPHONE_OS_VERSION_MIN_REQUIRED < __IPHONE_17_0
@@ -183,7 +179,7 @@ index 3314322b992db1e8cfa217de1ae8d8c794df4f5b..d56ca5fd63879d6e7c3793fee0b5b373
    else {
      [self modifyVideoOrientation];
    }
-@@ -93,25 +94,29 @@
+@@ -93,18 +94,22 @@
  #pragma mark - Private
  
  - (void)addOrientationObserver {
@@ -206,14 +202,6 @@ index 3314322b992db1e8cfa217de1ae8d8c794df4f5b..d56ca5fd63879d6e7c3793fee0b5b373
  }
  
  - (AVCaptureVideoPreviewLayer *)previewLayer {
-   return (AVCaptureVideoPreviewLayer *)self.layer;
- }
- 
--- (void)modifyVideoAngle API_AVAILABLE(ios(17.0)) {
-+- (void)modifyVideoAngle API_AVAILABLE(ios(17.0), tvos(17.0)) {
-   AVCaptureDeviceInput* captureSessionInput =
-       _captureSession.inputs.firstObject;
-   AVCaptureDevice* camera = captureSessionInput.device;
 @@ -128,7 +133,8 @@
    }
  }
@@ -224,10 +212,3 @@ index 3314322b992db1e8cfa217de1ae8d8c794df4f5b..d56ca5fd63879d6e7c3793fee0b5b373
  - (void)modifyVideoOrientation {
    // Get current device orientation.
    UIDeviceOrientation deviceOrientation = [UIDevice currentDevice].orientation;
-@@ -156,4 +162,4 @@
- }
- #endif
- 
--@end
-\ No newline at end of file
-+@end

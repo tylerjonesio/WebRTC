@@ -767,13 +767,12 @@ diff --git a/sdk/objc/components/video_codec/RTCDefaultVideoEncoderFactory.mm b/
 index 3cc21218045ff4eb5bb87d129a0215baf3b080d6..64e84290b05eed7d6da96901f4b19c3561e83db8 100644
 --- a/sdk/objc/components/video_codec/RTCDefaultVideoEncoderFactory.mm
 +++ b/sdk/objc/components/video_codec/RTCDefaultVideoEncoderFactory.mm
-@@ -91,7 +91,8 @@
+@@ -91,7 +91,7 @@
        scalabilityMode:(nullable NSString *)scalabilityMode {
    std::optional<webrtc::ScalabilityMode> mode;
    if (scalabilityMode) {
 -    mode = webrtc::ScalabilityModeStringToEnum([scalabilityMode stdString]);
-+    mode =
-+        webrtc::ScalabilityModeStringToEnum([scalabilityMode rtcStdString]);
++    mode = webrtc::ScalabilityModeStringToEnum([scalabilityMode rtcStdString]);
      if (!mode.has_value()) {
        return [[RTC_OBJC_TYPE(RTCVideoEncoderCodecSupport) alloc]
            initWithSupported:NO];

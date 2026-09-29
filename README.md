@@ -15,6 +15,9 @@ The binary releases correspond with official Chromium releases and branches as s
 * All binaries in this repository are compiled from the official WebRTC [source code](https://webrtc.googlesource.com/src/).
 * Certain patches have been applied to ensure proper compilation for all of the included platforms. They can be found in the `patches/` directory.
 * Dynamic framework (xcframework format) which contains multiple binaries for macOS, iOS, and tvOS.
+* Added support for extra encodings: VP9, H264 and AV1.
+* H.265 / HEVC: the SDP negotiation and RTP packetization layer is compiled but WebRTC ships no HEVC encoder or decoder for Apple platforms.
+* dSYM files are included in case you need them. You can download them from the [releases page](https://github.com/stasel/WebRTC/releases). *(Available from version M152).*
 
 ## 📢 Requirements
 * iOS 12+
@@ -40,7 +43,7 @@ Xcode has a built-in support for Swift package manager. You can easily add the p
 Or, you can add the following dependency to your `Package.swift` file:
 ```swift
 dependencies: [
-    .package(url: "https://github.com/tylerjonesio/WebRTC.git", .upToNextMajor("117.0.0"))
+    .package(url: "https://github.com/tylerjonesio/WebRTC.git", .upToNextMajor("153.0.0"))
 ]
 ```
 
@@ -73,6 +76,6 @@ https://webrtc.googlesource.com/src/+/refs/heads/main/docs/native-code/ios/READM
 
 You can also take a look at the [build script](scripts/build.sh) I created for more details.
 
-## 📃 License
-* BSD 3-Clause License
+## 📃 Licenses
+* Build scripts (this repository): `BSD 3-Clause License`
 * WebRTC License: https://webrtc.org/support/license
